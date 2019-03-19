@@ -57,7 +57,7 @@ void lcd1602_init()
 void lcd1602_clear(void) 
 { 
 	lcd1602_write_cmd(0x01); 
-	DelayMs(5);
+	DelayMs(1);
 }
 /*------------------------------------------------
                 右移滚动函数
