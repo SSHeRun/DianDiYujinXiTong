@@ -9,6 +9,8 @@ uchar dishu_sheding = 0;
 uchar dishu_shiji = 0;
 uchar diandi_number = 0;
 uchar Number = 0;
+uchar PuZh[34] = "";
+uchar level = 0;
 
 sbit buzzer = P2^3;
 
@@ -79,10 +81,19 @@ void T0_Time() interrupt 1
 		dishu_shiji = diandi_number*6;
 		if((dishu_shiji-dishu_sheding)>6)//自动校正流速程序
 		{
-			Move(1,10);
+			level++;
+			if(level<=13)
+				{
+					Move(1,10);
+				}
 		}
 		else if((dishu_shiji-dishu_sheding)<-6)
 		{
+			level--;
+			if(level>=0)
+				{
+					Move(1,10);
+				}
 			Move(0,10);
 		}
 		else;
@@ -91,10 +102,16 @@ void T0_Time() interrupt 1
 	}
 }
 /*------------------------------------------------
- 中断1函数，检测点滴袋是否有液体，当发生中断，蜂鸣器报警
+ 中断1函数，检测点滴袋是否有液体，当发生中断，蜂鸣器报警，并且关闭输液管
 ------------------------------------------------*/
 void Interrupt1() interrupt 2
 {
+	uchar i=0;
+	for(;i<13-level;i++)
+	{
+		Move(1,10);
+	}
+	dishu_sheding=0;
 	buzzer = 0;
 }
 
@@ -117,7 +134,18 @@ void Com_Int(void) interrupt 4
 			
 		if(receive_data == '1')	 
 		{
+			PuZh[0]='0'+dishu_shiji/100;
+			PuZh[1]='0'+dishu_shiji%100/10;
+			PuZh[2]='0'+dishu_shiji%10;
+			PuZh[3]='\0';
+			for(i=0; i<4; i++)
+		{
+				SBUF = PuZh[i];   //将要发送的数据放入到发送寄存器
+				while(!TI);		    //等待发送数据完成
+				TI=0;			        //清除发送完成标志位
+				DelayMs(1);
 				//LED =0;
+		}
 		}
 		else
 		{
@@ -126,13 +154,7 @@ void Com_Int(void) interrupt 4
 		
 	}
 		
-		for(i=0; i<36; i++)
-		{
-			SBUF = dishu_shiji;   //将要发送的数据放入到发送寄存器
-			while(!TI);		    //等待发送数据完成
-			TI=0;			        //清除发送完成标志位
-			DelayMs(1);
-		}
+	
 		EA = 1;
 }
 
@@ -159,8 +181,7 @@ void main()
 		lcd1602_write_char(6,0,'0'+dishu_shiji/100);
 		lcd1602_write_char(7,0,'0'+dishu_shiji%100/10);
 		lcd1602_write_char(8,0,'0'+dishu_shiji%10);
-		
-		
+				
 			
 		if (KeyPress())
         {//按键处理程序
@@ -184,6 +205,7 @@ void main()
 									}
 									if(keyvalue ==16)//退出
 									{
+										level = 0;
 										break;
 									}
 									while (KeyPress());
@@ -227,9 +249,7 @@ void main()
 							}
 							
 						}
-						
-						
-						
+										
 						
 						if(keyvalue==13)
 						{//设定滴数
@@ -277,7 +297,12 @@ void main()
 							}
 						}
             while (KeyPress());
-        }
+        }else{
+					lcd1602_write_char(6,1,'0'+dishu_sheding/100);
+					lcd1602_write_char(7,2,'0'+dishu_sheding%100/10);
+					lcd1602_write_char(8,3,'0'+dishu_sheding%10);
+				}
+				
 		DelayMs(200);
 	}
 } 
