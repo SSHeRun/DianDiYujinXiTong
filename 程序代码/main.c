@@ -12,8 +12,7 @@ uchar Number = 0;
 uchar PuZh[34] = "";
 uchar level = 0;
 
-sbit buzzer = P2^3;
-
+sbit buzzer = P2^0;
 /*******************************************************************************
 * 函 数 名       : Timer_Init()
 * 函数功能		   : 设置定时
@@ -139,18 +138,18 @@ void Com_Int(void) interrupt 4
 			PuZh[2]='0'+dishu_shiji%10;
 			PuZh[3]='\0';
 			for(i=0; i<4; i++)
+			{
+					SBUF = PuZh[i];   //将要发送的数据放入到发送寄存器
+					while(!TI);		    //等待发送数据完成
+					TI=0;			        //清除发送完成标志位
+					DelayMs(1);
+					//LED =0;
+			}
+		}
+		else if(receive_data == '2')
 		{
-				SBUF = PuZh[i];   //将要发送的数据放入到发送寄存器
-				while(!TI);		    //等待发送数据完成
-				TI=0;			        //清除发送完成标志位
-				DelayMs(1);
-				//LED =0;
-		}
-		}
-		else
-		{
-				//LED =1; 
-		}
+				buzzer=!buzzer; 
+		}else;
 		
 	}
 		
@@ -167,9 +166,11 @@ void main()
 	uchar value[3]={0,0,0};//保存输入设定滴数的值,默认为0
 	uchar i;//临时变量
 	
+	buzzer=1;//初始化蜂鸣器
+	lcd1602_init();//初始化lcd
 	Timer_Init();//初始化定时
 	UsartConfiguration();//初始化串口
-	lcd1602_init();
+		
 	
 	while(1)
 	{		
@@ -181,7 +182,7 @@ void main()
 		lcd1602_write_char(6,0,'0'+dishu_shiji/100);
 		lcd1602_write_char(7,0,'0'+dishu_shiji%100/10);
 		lcd1602_write_char(8,0,'0'+dishu_shiji%10);
-				
+			
 			
 		if (KeyPress())
         {//按键处理程序

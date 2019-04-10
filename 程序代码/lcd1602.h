@@ -3,9 +3,9 @@
 
 
 #define lcd1602_io P0
-sbit lcd1602_en = P2 ^ 0;
-sbit lcd1602_rw = P2 ^ 1;
-sbit lcd1602_rs = P2 ^ 2;
+sbit lcd1602_en = P2 ^ 5;
+sbit lcd1602_rw = P2 ^ 6;
+sbit lcd1602_rs = P2 ^ 7;
 
 
 /*------------------------------------------------
@@ -13,9 +13,12 @@ sbit lcd1602_rs = P2 ^ 2;
 ------------------------------------------------*/
 void lcd1602_write_cmd(unsigned char cmd)
 {
-    lcd1602_io = cmd;
+		
+    
     lcd1602_rs = 0;
     lcd1602_en = 0;
+		lcd1602_rw = 0;
+		lcd1602_io = cmd;
     DelayMs(1);
     lcd1602_en = 1;
     DelayMs(1);
@@ -26,9 +29,12 @@ void lcd1602_write_cmd(unsigned char cmd)
 ------------------------------------------------*/
 void lcd1602_write_data(unsigned char dat)
 {
-    lcd1602_io = dat;
+		
+   
     lcd1602_rs = 1;
     lcd1602_en = 0;
+		lcd1602_rw = 0;
+		lcd1602_io = dat;
     DelayMs(1);
     lcd1602_en = 1;
     DelayMs(1);

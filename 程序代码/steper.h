@@ -1,10 +1,10 @@
 #define uchar unsigned char
 #define uint unsigned int
 
-sbit A1=P2^4; //定义步进电机连接端口
-sbit B1=P2^5;
-sbit C1=P2^6;
-sbit D1=P2^7;
+sbit A1=P2^1; //定义步进电机连接端口
+sbit B1=P2^2;
+sbit C1=P2^3;
+sbit D1=P2^4;
 
 
 #define Coil_A1 {A1=1;B1=0;C1=0;D1=0;}//A相通电，其他相断电
