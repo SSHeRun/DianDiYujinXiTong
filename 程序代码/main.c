@@ -5,14 +5,14 @@
 #include "steper.h"
 #include "keypress.h"
 
-uchar dishu_sheding = 0;
-uchar dishu_shiji = 0;
-uchar diandi_number = 0;
-uchar Number = 0;
-uchar PuZh[34] = "";
-uchar level = 0;
+uchar dishu_sheding = 0;//设定滴数
+uchar dishu_shiji = 0;//实际滴数
+uchar diandi_number = 0;//滴数数值
+uchar Number = 0;//时间计数
+uchar PuZh[4] = "";//存储发送数据
+uchar level = 0;//当前步进电机的位置
 
-sbit buzzer = P2^0;
+sbit buzzer = P2^0;//蜂鸣器
 /*******************************************************************************
 * 函 数 名       : Timer_Init()
 * 函数功能		   : 设置定时
@@ -80,20 +80,22 @@ void T0_Time() interrupt 1
 		dishu_shiji = diandi_number*6;
 		if((dishu_shiji-dishu_sheding)>6)//自动校正流速程序
 		{
-			level++;
+			
 			if(level<=13)
 				{
+					level++;
 					Move(1,10);
 				}
 		}
 		else if((dishu_shiji-dishu_sheding)<-6)
 		{
-			level--;
+			
 			if(level>=0)
 				{
-					Move(1,10);
+					level--;
+					Move(0,10);
 				}
-			Move(0,10);
+			
 		}
 		else;
 		
@@ -146,10 +148,36 @@ void Com_Int(void) interrupt 4
 					//LED =0;
 			}
 		}
-		else if(receive_data == '2')
+		else if(receive_data == '2')//关闭蜂鸣器
 		{
-				buzzer=!buzzer; 
-		}else;
+				buzzer=1; 
+		}
+		else if(receive_data == '3')//正向调整步进电机
+		{
+				if(level<=13)
+				{
+					level++;
+					Move(1,10);
+				} 
+		}
+			else if(receive_data == '4')//反向调整步进电机
+		{
+					if(level>=0)
+				{
+					level--;
+					Move(0,10);
+				}
+		}
+			else if(receive_data == '5')//关闭点滴
+		{
+					uchar i=0;
+					for(;i<13-level;i++)
+					{
+						Move(1,10);
+					}
+					dishu_sheding=0;
+			}
+		else;
 		
 	}
 		
