@@ -64,36 +64,37 @@ void UsartConfiguration()
 void Interrupt0() interrupt 0
 {
 	diandi_number++;
+	DelayMs(100);//软件防止波动
 }
 /*------------------------------------------------
-定时计数0，设定为10s，检测点滴速度，时间越长，精度越高
+定时计数0，设定为60s，检测点滴速度，时间越长，精度越高
 ------------------------------------------------*/
 void T0_Time() interrupt 1 
 {
 	/*  重装初值  */
 	TH0 = (65536-50000)/256;
 	TL0 = (65536-50000)%256;
-	Number++;
-	if(Number==20*10)
+	Number++;//自动校正流速程序
+	if(Number==20*60)//定时1分钟
 	{
 		Number = 0;
-		dishu_shiji = diandi_number*6;
-		if((dishu_shiji-dishu_sheding)>6)//自动校正流速程序
+		dishu_shiji = diandi_number;
+		if((dishu_shiji-dishu_sheding)>6)//滴速过快，步进电机正向转动，减慢滴速
 		{
 			
-			if(level<=13)
+			if(level<=13)//步进电机是否转到最大角度
 				{
 					level++;
-					Move(1,10);
+					Move(1,10);//正向转动
 				}
 		}
-		else if((dishu_shiji-dishu_sheding)<-6)
+		else if((dishu_shiji-dishu_sheding)<-6)//滴速过慢，步进电机反向转动，加快滴速
 		{
 			
-			if(level>=0)
+			if(level>=0)//步进是否转到最小角度
 				{
 					level--;
-					Move(0,10);
+					Move(0,10);//反向转动
 				}
 			
 		}
